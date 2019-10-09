@@ -30,21 +30,25 @@ def main():
     der_state_ftr_news_df = merge_news(der_state_ftr_df)
     der_state_ftr_nyt_bb_df = merge_bluebook(der_state_ftr_news_df)
     # Generate year column
-    der_state_ftr_nyt_bb_df['year']=der_state_ftr_nyt_bb_df['start_date'].apply(lambda x: x.year)
+    der_state_ftr_nyt_bb_df['year']=der_state_ftr_nyt_bb_df['end_date'].apply(lambda x: x.year)
     der_state_ftr_nyt_bb_df.to_csv("../output/meeting_derived_file.csv")
     
 def merge_statement(cur_df):
+    print(cur_df)
     print("merging statements")
     statement_df = pd.read_csv("../output/statements_text_extraction.csv")
-    cur_df = cur_df.drop_duplicates(subset="start_date")
-    cur_df = cur_df[['start_date','end_date','event_type']]
+    print(statement_df)
+    cur_df = cur_df.drop_duplicates(subset="end_date")
+    cur_df = cur_df[['end_date','event_type']]
     #print(len(cur_df))
-    statement_df = statement_df[['meeting_start_date','policy_change','policy_action']]
+    statement_df = statement_df[['end_date','policy_change','policy_action']]
     statement_df = statement_df.add_prefix("statement_")
-    statement_df.rename(columns={'statement_meeting_start_date':'start_date'},inplace=True)
+    statement_df.rename(columns={'statement_end_date':'end_date'},inplace=True)
     #print(statement_df)
     assert(len(statement_df)<len(cur_df))
-    merge_statement = cur_df.merge(statement_df,how="left",on="start_date",indicator=True)
+    print(cur_df.columns)
+    print(statement_df.columns)
+    merge_statement = cur_df.merge(statement_df,how="left",on="end_date",indicator=True)
     # OG: Indicator added. It indicates where statement is available despite extraction missing
     merge_statement.rename(columns={"_merge":"d_statement"},inplace=True)
     merge_statement['d_statement'].replace({'both':True,'left_only':False},inplace=True)
@@ -55,12 +59,12 @@ def merge_ftr(cur_df):
     print("merging futures")
     future_df = pd.read_csv("../output/federal_funds_futures.csv")
     #FFR Column is FF0 after adjusting for date
-    future_df['start_date'] = future_df['date']
+    future_df['end_date'] = future_df['date']
     future_df = future_df.drop('date',axis=1)
     future_df["FFF_0_rate"] = future_df["ffr_future"]
     future_df = future_df.drop("ffr_future",axis=1)
     merge_ftr = cur_df.\
-        merge(future_df,on="start_date",how="left")
+        merge(future_df,on="end_date",how="left")
 
     #print(merge_ftr)
     #print(merge_ftr.columns)
@@ -88,8 +92,8 @@ def merge_news(cur_df):
 def merge_bluebook(cur_df):
     print("merging bluebook")
     blue_df = pd.read_excel("../../../analysis/python/data/bluebook_manual_data_online_WORKING.xlsx")
-    blue_df['start_date'] = pd.to_datetime(blue_df['start_date'])
-    orig_columns = ['start_date','DFF_Before_meeting','DFEDTR_before',
+    blue_df['end_date'] = pd.to_datetime(blue_df['end_date'])
+    orig_columns = ['end_date','DFF_Before_meeting','DFEDTR_before',
                'DFEDTR_end','C_TREATMENT_alt_a','C_TREATMENT_SIZE_alt_a',
                'justify_alt_a', 'C_TREATMENT_alt_b','C_TREATMENT_SIZE_alt_b',
                'justify_alt_b', 'C_TREATMENT_alt_c','C_TREATMENT_SIZE_alt_c',
@@ -97,7 +101,7 @@ def merge_bluebook(cur_df):
                'justify_alt_d', 'C_TREATMENT_alt_e', 'C_TREATMENT_SIZE_alt_e',
                'justify_alt_e', 'comments']
     blue_df = blue_df[orig_columns]
-    new_cols = ['start_date','DFF_Before_meeting','DFEDTR_before',
+    new_cols = ['end_date','DFF_Before_meeting','DFEDTR_before',
                'DFEDTR_end','bluebook_treatment_alt_a','bluebook_treatment_size_alt_a',
                'bluebook_justify_alt_a', 'bluebook_treatment_alt_b','bluebook_treatment_size_alt_b',
                'bluebook_justify_alt_b', 'bluebook_treatment_alt_c','bluebook_treatment_size_alt_c',
@@ -105,9 +109,9 @@ def merge_bluebook(cur_df):
                'bluebook_justify_alt_d', 'bluebook_treatment_alt_e','bluebook_treatment_size_alt_e',
                'bluebook_justify_alt_e', 'bluebook_comments']
     blue_df.columns = new_cols
-    cur_df['start_date'] = pd.to_datetime(cur_df['start_date'])
+    cur_df['end_date'] = pd.to_datetime(cur_df['end_date'])
 
-    merge_bluebook = cur_df.merge(blue_df,on="start_date",how="left")
+    merge_bluebook = cur_df.merge(blue_df,on="end_date",how="left")
 
     return merge_bluebook
 

@@ -11,8 +11,8 @@ for every meeting in bluebook sentence period
 '''
 def main():
     classifier_validate_df = pd.read_excel("../data/manually_validated_treatments.xlsx")
-    alternative_d = pd.read_csv("../../Matlab/Output/Bluebook/CSV/SentencesD.csv",encoding="ISO-8859-1")
-    alternative_e = pd.read_csv("../../Matlab/Output/Bluebook/CSV/SentencesE.csv",encoding="ISO-8859-1")
+    alternative_d = pd.read_csv("../../../Matlab/Output/Bluebook/CSV/SentencesD.csv",encoding="ISO-8859-1")
+    alternative_e = pd.read_csv("../../../Matlab/Output/Bluebook/CSV/SentencesE.csv",encoding="ISO-8859-1")
     merge_result = merge_alternative_sentences(classifier_validate_df,alternative_d,alternative_e)
     final = transform_merged(merge_result)
     final.to_csv("../output/bluebook_data_for_online.csv")
