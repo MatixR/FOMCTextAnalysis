@@ -32,7 +32,7 @@ def clean_data(alternatives,speakers,votingrecord,alternative_results,speakerid,
    
     data = pd.concat([speakers,alts],axis=0,keys=[0, 1])
     data = data.reset_index()
-    data.drop(columns=["Unnamed: 0","level_1"],inplace=True)
+    data.drop(columns=["level_1"],inplace=True)
     data.rename(columns={"level_0":"d_alt"},inplace=True)
     
         # Create full speaker dictionary that contains non-voting memebers 
@@ -84,7 +84,7 @@ def clean_data(alternatives,speakers,votingrecord,alternative_results,speakerid,
 
     return newdata
 
-def main():
+def create_data():
     # Load dictionary
     with open('../output/data.json', 'r') as speakerids:
         speakerid = json.load(speakerids)
@@ -94,7 +94,7 @@ def main():
     
     # Load speaker text
     speakers = pd.read_csv("../output/speaker_data/speaker_corpus.csv").sort_values(by="Date")
-    speakers = speakers[speakers.FOMC_Section==2]
+    speakers = speakers[speakers.Section==2]
 
     # Alternatives that Anand collected
     alternatives = pd.read_csv("../output/alternative_outcomes_and_corpus.csv")
@@ -111,7 +111,8 @@ def main():
     return dataout
 
 
-
+if __name__ == "__main__":
+    create_data().to_csv("lda_data_intermediate.csv",index=False)
 
 # =============================================================================
 # # ### Do a variety of checks on the data

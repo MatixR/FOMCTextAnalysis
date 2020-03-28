@@ -44,7 +44,7 @@ rnd_state=5
 ###############################################################################
 
     ### Import data ###
-data = create_lda_data.main()
+data = create_lda_data.create_data()
 data.rename(columns={"start_date":"date"},inplace=True)
 data.to_csv("../output/lda_dataset.csv",index=False)
 
@@ -175,7 +175,7 @@ corpus = [dictionary.doc2bow(text) for text in texts]
 
 ###############################################################################
     ### Model Selection ###
-run_modelsel = True   
+run_modelsel = False   
 run_numtopic = True
 
 if run_modelsel == True:    
